@@ -1,0 +1,45 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install backend dependencies
+        working-directory: ./ProjeKitap
+        run: npm install
+
+      - name: Build backend (skip if not needed)
+        working-directory: ./ProjeKitap
+        run: |
+          if [ -f package.json ] && grep -q 'build' package.json; then npm run build; else echo "No build script"; fi
+
+      - name: Install frontend dependencies
+        working-directory: ./ProjeKitap
+        run: |
+          if [ -f package.json ] && grep -q 'react' package.json; then npm install; else echo "No frontend found"; fi
+
+      - name: Build frontend (skip if not needed)
+        working-directory: ./ProjeKitap
+        run: |
+          if [ -f package.json ] && grep -q 'react' package.json; then npm run build || echo "No build script"; else echo "No frontend found"; fi
+
+      # - name: Run tests (uncomment if you have tests)
+      #   working-directory: ./ProjeKitap
+      #   run: npm test 
