@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const ProductSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: String,
-  price: { type: Number, required: true },
+  fiyat: { type: Number, required: true }, // price yerine fiyat
   stock: { type: Number, default: 0 }
 });
 

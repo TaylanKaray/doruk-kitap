@@ -21,7 +21,7 @@ let redisClient = null;
       console.log('REDIS_URL bulunamadı, cache devre dışı');
     }
   } catch (err) {
-    console.log('Redis bağlantısı başarısız, cache devre dışı:', err.message);
+    console.log('Redis bağlantısı başarısız:', err.message);
     redisClient = null;
   }
 })();
@@ -49,8 +49,8 @@ async function admin(req, res, next) {
 // Ürün ekle (admin)
 router.post('/', auth, admin, async (req, res) => {
   try {
-    const { name, description, price, stock } = req.body;
-    const product = new Product({ name, description, price, stock });
+    const { name, description, fiyat, stock } = req.body; // price yerine fiyat
+    const product = new Product({ name, description, fiyat, stock });
     await product.save();
     res.status(201).json({ message: 'Ürün eklendi.', product });
   } catch {
@@ -61,10 +61,10 @@ router.post('/', auth, admin, async (req, res) => {
 // Ürün güncelle (admin)
 router.put('/:id', auth, admin, async (req, res) => {
   try {
-    const { name, description, price, stock } = req.body;
+    const { name, description, fiyat, stock } = req.body; // price yerine fiyat
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      { name, description, price, stock },
+      { name, description, fiyat, stock },
       { new: true }
     );
     if (!product) return res.status(404).json({ message: 'Ürün bulunamadı.' });
