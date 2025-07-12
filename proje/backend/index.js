@@ -9,9 +9,11 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB bağlantısı
+console.log('MongoDB bağlantısı başlatılıyor...');
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB bağlantısı başarılı'))
   .catch(err => console.error('MongoDB bağlantı hatası:', err));
+console.log('MongoDB bağlantısı kodu geçildi.');
 
 // Routers
 app.use('/api/products', require('./routes/products'));
@@ -25,7 +27,7 @@ app.get('/', (req, res) => {
   res.send('API Çalışıyor!');
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 }); 
