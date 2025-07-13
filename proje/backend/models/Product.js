@@ -10,7 +10,9 @@ const ProductSchema = new mongoose.Schema({
   isbn: { type: String },
   resimUrl: { type: String },
   sayfaSayisi: { type: Number },
-  kategori: { type: String }
+  kategori: { type: String },
+  cokSatan: { type: Boolean, default: false },
+  yeniCikan: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model('Product', ProductSchema); 
