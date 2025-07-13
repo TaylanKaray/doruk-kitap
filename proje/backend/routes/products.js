@@ -49,8 +49,8 @@ async function admin(req, res, next) {
 // Ürün ekle (admin)
 router.post('/', auth, admin, async (req, res) => {
   try {
-    const { name, description, fiyat, stock } = req.body; // price yerine fiyat
-    const product = new Product({ name, description, fiyat, stock });
+    const { ad, aciklama, fiyat, stok, yazar, yayinevi, isbn, resimUrl, sayfaSayisi, kategori } = req.body;
+    const product = new Product({ ad, aciklama, fiyat, stok, yazar, yayinevi, isbn, resimUrl, sayfaSayisi, kategori });
     await product.save();
     res.status(201).json({ message: 'Ürün eklendi.', product });
   } catch {
@@ -61,10 +61,10 @@ router.post('/', auth, admin, async (req, res) => {
 // Ürün güncelle (admin)
 router.put('/:id', auth, admin, async (req, res) => {
   try {
-    const { name, description, fiyat, stock } = req.body; // price yerine fiyat
+    const { ad, aciklama, fiyat, stok, yazar, yayinevi, isbn, resimUrl, sayfaSayisi, kategori } = req.body;
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      { name, description, fiyat, stock },
+      { ad, aciklama, fiyat, stok, yazar, yayinevi, isbn, resimUrl, sayfaSayisi, kategori },
       { new: true }
     );
     if (!product) return res.status(404).json({ message: 'Ürün bulunamadı.' });
