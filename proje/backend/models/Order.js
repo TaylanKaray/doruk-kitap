@@ -5,7 +5,9 @@ const OrderSchema = new mongoose.Schema({
   products: [
     {
       product: { type: String },
-      quantity: { type: Number, default: 1 }
+      quantity: { type: Number, default: 1 },
+      ad: { type: String }, // ürün adı
+      fiyat: { type: Number } // ürün fiyatı
     }
   ],
   total: { type: Number, required: true },

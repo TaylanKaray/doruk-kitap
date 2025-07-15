@@ -49,10 +49,32 @@ router.post('/', auth, async (req, res) => {
       ...item,
       product: item.product
     }));
+
+    // Ürün bilgilerini Product tablosundan çek, fiyat ve ad ekle, stok azalt
+    let total = 0;
+    const updatedProducts = [];
+    for (const item of products) {
+      const productDoc = await Product.findById(item.product);
+      if (!productDoc) continue;
+      const fiyat = productDoc.fiyat;
+      const ad = productDoc.ad;
+      const quantity = item.quantity || 1;
+      total += fiyat * quantity;
+      updatedProducts.push({
+        product: item.product,
+        quantity,
+        ad,
+        fiyat
+      });
+      // Stok azalt
+      productDoc.stok = Math.max(0, productDoc.stok - quantity);
+      await productDoc.save();
+    }
+
     const order = new Order({
       user: req.userId,
-      products,
-      total: 0 // Demo için toplamı sıfır yapıyoruz
+      products: updatedProducts,
+      total
     });
     await order.save();
     res.status(201).json({ message: 'Sipariş oluşturuldu.', order });
