@@ -58,16 +58,52 @@ router.post('/', auth, admin, async (req, res) => {
   }
 });
 
-// Ürün güncelle (admin)
+// Stok gelince haber ver: e-posta bırak
+router.post('/:id/stok-bildirim', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'E-posta zorunlu.' });
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Ürün bulunamadı.' });
+    if (!product.stokBildirimBekleyenler.includes(email)) {
+      product.stokBildirimBekleyenler.push(email);
+      await product.save();
+    }
+    res.status(201).json({ message: 'E-posta kaydedildi.' });
+  } catch {
+    res.status(500).json({ message: 'Sunucu hatası.' });
+  }
+});
+
+// Ürün güncelle (admin) - stok artarsa bildirim gönder
 router.put('/:id', auth, admin, async (req, res) => {
   try {
     const { ad, aciklama, fiyat, stok, yazar, yayinevi, isbn, resimUrl, sayfaSayisi, kategori, cokSatan, yeniCikan } = req.body;
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      { ad, aciklama, fiyat, stok, yazar, yayinevi, isbn, resimUrl, sayfaSayisi, kategori, cokSatan, yeniCikan },
-      { new: true }
-    );
+    const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: 'Ürün bulunamadı.' });
+    const eskiStok = product.stok;
+    // Alanları güncelle
+    product.ad = ad;
+    product.aciklama = aciklama;
+    product.fiyat = fiyat;
+    product.stok = stok;
+    product.yazar = yazar;
+    product.yayinevi = yayinevi;
+    product.isbn = isbn;
+    product.resimUrl = resimUrl;
+    product.sayfaSayisi = sayfaSayisi;
+    product.kategori = kategori;
+    product.cokSatan = cokSatan;
+    product.yeniCikan = yeniCikan;
+    await product.save();
+    // Stok sıfırdan büyüğe çıktıysa bildirim gönder
+    if (eskiStok === 0 && stok > 0 && product.stokBildirimBekleyenler.length > 0) {
+      // Burada gerçek e-posta gönderimi yapılabilir
+      console.log('Stok bildirimi gönderilecek:', product.stokBildirimBekleyenler);
+      // Bildirim gönderildikten sonra listeyi temizle
+      product.stokBildirimBekleyenler = [];
+      await product.save();
+    }
     res.json({ message: 'Ürün güncellendi.', product });
   } catch {
     res.status(500).json({ message: 'Sunucu hatası.' });
@@ -118,6 +154,35 @@ router.get('/:id', async (req, res) => {
     res.json(product);
   } catch (err) {
     console.error('Ürün detayında hata:', err);
+    res.status(500).json({ message: 'Sunucu hatası.' });
+  }
+});
+
+// Kitaba yorum ekle (kullanıcı)
+router.post('/:id/yorum', auth, async (req, res) => {
+  try {
+    const { puan, yorum } = req.body;
+    if (!puan || !yorum) return res.status(400).json({ message: 'Puan ve yorum zorunlu.' });
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Ürün bulunamadı.' });
+    // Aynı kullanıcı birden fazla yorum yapmasın (isteğe bağlı)
+    // const once = product.yorumlar.find(y => y.kullanici.toString() === req.userId);
+    // if (once) return res.status(400).json({ message: 'Bu ürüne zaten yorum yaptınız.' });
+    product.yorumlar.push({ kullanici: req.userId, puan, yorum });
+    await product.save();
+    res.status(201).json({ message: 'Yorum eklendi.' });
+  } catch {
+    res.status(500).json({ message: 'Sunucu hatası.' });
+  }
+});
+
+// Kitabın yorumlarını getir (herkes)
+router.get('/:id/yorumlar', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id).populate('yorumlar.kullanici', 'email name surname');
+    if (!product) return res.status(404).json({ message: 'Ürün bulunamadı.' });
+    res.json(product.yorumlar);
+  } catch {
     res.status(500).json({ message: 'Sunucu hatası.' });
   }
 });

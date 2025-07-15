@@ -6,6 +6,7 @@ const UserSchema = new mongoose.Schema({
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
   isAdmin: { type: Boolean, default: false },
   name: { type: String },
+  surname: { type: String },
   address: { type: String }
 });
 

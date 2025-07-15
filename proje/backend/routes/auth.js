@@ -7,13 +7,13 @@ const jwt = require('jsonwebtoken');
 // Kayıt
 router.post('/register', async (req, res) => {
   console.log('REGISTER ENDPOINT ÇALIŞTI');
-  const { email, password } = req.body;
+  const { email, password, name, surname } = req.body;
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'Bu e-posta zaten kayıtlı.' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ email, password: hashedPassword });
+    const newUser = new User({ email, password: hashedPassword, name, surname });
     await newUser.save();
     res.status(201).json({ message: 'Kayıt başarılı!' });
   } catch (err) {

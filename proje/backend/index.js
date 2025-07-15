@@ -21,6 +21,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/favorites', require('./routes/favorites'));
+app.use('/api/contact', require('./routes/contact'));
 
 // Test endpoint
 app.get('/', (req, res) => {
